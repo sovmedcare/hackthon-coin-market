@@ -1,4 +1,4 @@
-import g2 from '@antv/g2'
+const g2 = require('@antv/g2')
 
 const data = [
   { year: '1991', value: 3 },
@@ -11,27 +11,28 @@ const data = [
   { year: '1998', value: 9 },
   { year: '1999', value: 13 }
 ];
-const chart = new g2.Chart({
-  container: 'chart',
-  forceFit: true,
-  height: window.innerHeight
-});
-chart.source(data);
-chart.scale('value', {
-  min: 0
-});
-chart.scale('year', {
-  range: [ 0 , 1 ]
-});
-chart.tooltip({
-  crosshairs: {
-    type: 'line'
-  }
-});
-chart.line().position('year*value');
-chart.point().position('year*value').size(4).shape('circle').style({
-  stroke: '#fff',
-  lineWidth: 1
-});
-chart.render()
-export { chart }
+module.exports = function create() {
+  const _chart = new g2.Chart({
+    container: 'chart',
+    forceFit: true,
+    height: window.innerHeight
+  });
+  _chart.source(data);
+  _chart.scale('value', {
+    min: 0
+  });
+  _chart.scale('year', {
+    range: [ 0 , 1 ]
+  });
+  _chart.tooltip({
+    crosshairs: {
+      type: 'line'
+    }
+  });
+  _chart.line().position('year*value');
+  _chart.point().position('year*value').size(4).shape('circle').style({
+    stroke: '#fff',
+    lineWidth: 1
+  });
+  _chart.render()
+}
