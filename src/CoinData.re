@@ -1,6 +1,10 @@
 let baseUrl = "https://min-api.cryptocompare.com";
+
 let coinListUrl = {j|$baseUrl/data/all/coinlist|j};
-let historyUrl = {j|$baseUrl/data/histohour?fsym=BTC&tsym=USD&limit=60&aggregate=3&e=CCCAGG|j};
+let priceUrl = (coinName) => {j|$baseUrl/data/price?fsym=BTC&tsyms=USD,EUR|j};
+let historyHourUrl = {j|$baseUrl/data/histohour?fsym=BTC&tsym=USD&limit=60&aggregate=3&e=CCCAGG|j};
+let historyDayUrl = {j|$baseUrl/data/histoday?fsym=BTC&tsym=USD&limit=60&aggregate=3&e=CCCAGG|j};
+let topPairUrl = {j|$baseUrl/data/top/pairs?fsym=ETH|j};
 
 let transformCoinList: (Js.Json.t) => (Js.Json.t) = [%bs.raw
   {|
@@ -13,7 +17,7 @@ let transformCoinList: (Js.Json.t) => (Js.Json.t) = [%bs.raw
   |}
 ];
 
-let transformHistories: (Js.Json.t) => (Js.Json.t) = [%bs.raw
+let transformData: (Js.Json.t) => (Js.Json.t) = [%bs.raw
   {|
     function (json) {
       return json['Data']
@@ -35,6 +39,12 @@ type coin = {
 
 type coins = array(coin);
 
+type price = {
+  usd: float,
+  eur: float,
+  twd: float
+};
+
 type history = {
   time: int,
   close: float,
@@ -46,6 +56,16 @@ type history = {
 }; 
 
 type histories = array(history);
+
+type topPair = {
+  exchange: string,
+  fromSymbol: string,
+  toSymbol: string,
+  volume24h: float,
+  volume24hTo: float
+}; 
+
+type topPairs = array(topPair);
 
 module Decode = {
   let coin = (json) : coin =>
@@ -64,6 +84,13 @@ module Decode = {
   let coins = (json) : array(coin) =>
     Json.Decode.(json |> array(coin));
 
+  let price = (json) : price =>
+    Json.Decode.{
+      usd: json |> field("USD", float),
+      eur: json |> field("EUR", float),
+      twd: json |> field("TWD", float),
+    };
+
   let history = (json) : history =>
     Json.Decode.{
       time: json |> field("time", int),
@@ -77,6 +104,19 @@ module Decode = {
 
   let histories = (json) : array(history) =>
     Json.Decode.(json |> array(history));
+
+  let topPair = (json) : topPair =>
+    Json.Decode.{
+      exchange: json |> field("exchange", string),
+      fromSymbol: json |> field("fromSymbol", string),
+      toSymbol: json |> field("toSymbol", string),
+      volume24h: json |> field("volume24h", float),
+      volume24hTo: json |> field("volume24hTo", float)
+    };
+
+  let topPairs = (json) : array(topPair) =>
+    Json.Decode.(json |> array(topPair));
+
 };
 
 let fetchCoinList = (callback) => 
@@ -85,13 +125,8 @@ let fetchCoinList = (callback) =>
     |> then_(Fetch.Response.json)
     |> then_(json => {
       json  |> transformCoinList
-            |> coins => {
-              Js.log(coins);
-              coins;
-            }
             |> Decode.coins
             |> coins => {
-              Js.log(coins);
               callback(coins);
               resolve(());
            }
@@ -100,15 +135,29 @@ let fetchCoinList = (callback) =>
     |> ignore
   );
 
-let fetchHistoryByHour = (callback) =>
+let fetchPrice = (coinName, callback) =>
   Js.Promise.(
-    Fetch.fetch(historyUrl)
+    Fetch.fetch(priceUrl(coinName))
     |> then_(Fetch.Response.json)
     |> then_(json => {
-      json  |> transformHistories
+      json  |> Decode.price
+            |> price => {
+              callback(price);
+              resolve(());
+            }
+      }
+    )
+    |> ignore
+  );
+
+let fetchHistoryByHour = (callback) =>
+  Js.Promise.(
+    Fetch.fetch(historyHourUrl)
+    |> then_(Fetch.Response.json)
+    |> then_(json => {
+      json  |> transformData
             |> Decode.histories
             |> histories => {
-              Js.log(histories);
               callback(histories);
               resolve(());
             }
@@ -125,4 +174,36 @@ let fetchHistoryByHour = (callback) =>
       callback(histories);
       resolve(());
     } */
+  );
+
+let fetchHistoryByDay = (callback) =>
+  Js.Promise.(
+    Fetch.fetch(historyDayUrl)
+    |> then_(Fetch.Response.json)
+    |> then_(json => {
+      json  |> transformData
+            |> Decode.histories
+            |> histories => {
+              callback(histories);
+              resolve(());
+            }
+      }
+    )
+    |> ignore
+  );
+
+let fetchTopPairs = (callback) =>
+  Js.Promise.(
+    Fetch.fetch(topPairUrl)
+    |> then_(Fetch.Response.json)
+    |> then_(json => {
+      json  |> transformData
+            |> Decode.topPairs
+            |> topPairs => {
+              callback(topPairs);
+              resolve(());
+            }
+      }
+    )
+    |> ignore
   );
