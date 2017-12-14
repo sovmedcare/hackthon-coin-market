@@ -552,7 +552,7 @@ const fakeData = [
   "volumeto": 114446009.55
   }
 ]
-module.exports = function create(data) {
+const create = (data) => {
   const ds = new DataSet();
   const dv = ds.createView();
   dv.source(fakeData)
@@ -619,3 +619,4 @@ module.exports = function create(data) {
   chart.render();
 
 }
+module.exports = create
