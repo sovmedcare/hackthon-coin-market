@@ -2,11 +2,21 @@ let baseUrl = "https://min-api.cryptocompare.com";
 let coinListUrl = {j|$baseUrl/data/all/coinlist|j};
 let historyUrl = {j|$baseUrl/data/histohour?fsym=BTC&tsym=USD&limit=60&aggregate=3&e=CCCAGG|j};
 
-let transformAPI: (Js.Json.t) => (Js.Json.t) = [%bs.raw
+let transformCoinList: (Js.Json.t) => (Js.Json.t) = [%bs.raw
   {|
     function (json) {
-      var data = json['Data']
-      return Object.values(data)
+      var defaultCoins = ['BTC', 'ETH', 'LTC'];      
+      return defaultCoins.map(function(coin) {
+        return json['Data'][coin]
+      })
+    }
+  |}
+];
+
+let transformHistories: (Js.Json.t) => (Js.Json.t) = [%bs.raw
+  {|
+    function (json) {
+      return json['Data']
     }
   |}
 ];
@@ -38,11 +48,6 @@ type history = {
 type histories = array(history);
 
 module Decode = {
-  let parseCoinListAPI = (json) : Js.Json.t => {
-    Js.log(transformAPI(json));
-    json;
-  };
-
   let coin = (json) : coin =>
     Json.Decode.{
       id: json |> field("Id", string),
@@ -79,13 +84,17 @@ let fetchCoinList = (callback) =>
     Fetch.fetch(coinListUrl)
     |> then_(Fetch.Response.json)
     |> then_(json => {
-      FakeData.coinList |> Js.Json.parseExn
-                        |> Decode.coins
-                        |> coins => {
-                          Js.log(coins);
-                          callback(coins);
-                          resolve(());
-                        }
+      json  |> transformCoinList
+            |> coins => {
+              Js.log(coins);
+              coins;
+            }
+            |> Decode.coins
+            |> coins => {
+              Js.log(coins);
+              callback(coins);
+              resolve(());
+           }
       }
     )
     |> ignore
@@ -96,14 +105,24 @@ let fetchHistoryByHour = (callback) =>
     Fetch.fetch(historyUrl)
     |> then_(Fetch.Response.json)
     |> then_(json => {
-      FakeData.history  |> Js.Json.parseExn
-                        |> Decode.histories
-                        |> histories => {
-                          Js.log(histories);
-                          callback(histories);
-                          resolve(());
-                        }
+      json  |> transformHistories
+            |> Decode.histories
+            |> histories => {
+              Js.log(histories);
+              callback(histories);
+              resolve(());
+            }
       }
     )
     |> ignore
+
+    /* 
+    如果要用 fake data
+    FakeData.history  |> Js.Json.parseExn
+    |> Decode.histories
+    |> histories => {
+      Js.log(histories);
+      callback(histories);
+      resolve(());
+    } */
   );
