@@ -7,8 +7,9 @@ let make = (~route, _children) => {
   render: (_self) => {
     let page =
       switch route {
-      | Routing.Home => <h1>(ReasonReact.stringToElement("Hello"))</h1>
+      | Routing.Home => <Home />
       | Routing.Detail(id) => <DetailPage id />
+      | Routing.Api => <Api />
       };
     <div> page </div>
   }
