@@ -39,7 +39,7 @@ let make = (~id, _children) => {
   },
   render: (_self) => {
     <div>
-      <h1> (intEl(id)) </h1>
+      <h1> (textEl(id)) </h1>
       <div id="chart"></div>
     </div>
   }

@@ -3,8 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@antv/data-set": "^0.8.0",
     "@antv/g2": "^3.0.2-beta.1",
     "bs-director": "^0.0.6",
+    "moment": "^2.19.4",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "reason-scripts": "0.8.0"
