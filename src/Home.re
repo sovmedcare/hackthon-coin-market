@@ -67,7 +67,7 @@ let make = (_children) => {
                   )
                 )>
                   <div>{ReasonReact.stringToElement(coin.id)}</div>
-                  <a href={"/#/detail/" ++ coin.id}>{ReasonReact.stringToElement(coin.coinName)}</a>
+                  <a href={"/#/detail/" ++ coin.name}>{ReasonReact.stringToElement(coin.coinName)}</a>
                 </div>
               }
             )
