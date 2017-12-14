@@ -1,5 +1,6 @@
 let baseUrl = "https://min-api.cryptocompare.com";
 let coinListUrl = {j|$baseUrl/data/all/coinlist|j};
+let historyUrl = {j|$baseUrl/data/histohour?fsym=BTC&tsym=USD&limit=60&aggregate=3&e=CCCAGG|j};
 
 let transformAPI: (Js.Json.t) => (Js.Json.t) = [%bs.raw
   {|
@@ -9,77 +10,6 @@ let transformAPI: (Js.Json.t) => (Js.Json.t) = [%bs.raw
     }
   |}
 ];
-
-let coinListFakeData = {| [
-  {
-    "Id": "1182",
-    "Url": "/coins/btc/overview",
-    "ImageUrl": "/media/19633/btc.png",
-    "Name": "BTC",
-    "Symbol": "BTC",
-    "CoinName": "Bitcoin",
-    "FullName": "Bitcoin (BTC)",
-    "Algorithm": "SHA256",
-    "ProofType": "PoW",
-    "FullyPremined": "0",
-    "TotalCoinSupply": "21000000",
-    "PreMinedValue": "N/A",
-    "TotalCoinsFreeFloat": "N/A",
-    "SortOrder": "1",
-    "Sponsored": false
-  },
-  {
-    "Id": "7605",
-    "Url": "/coins/eth/overview",
-    "ImageUrl": "/media/20646/eth_logo.png",
-    "Name": "ETH",
-    "Symbol": "ETH",
-    "CoinName": "Ethereum",
-    "FullName": "Ethereum (ETH)",
-    "Algorithm": "Ethash",
-    "ProofType": "PoW",
-    "FullyPremined": "0",
-    "TotalCoinSupply": "0",
-    "PreMinedValue": "N/A",
-    "TotalCoinsFreeFloat": "N/A",
-    "SortOrder": "2",
-    "Sponsored": false
-  },
-  {
-    "Id": "7605",
-    "Url": "/coins/eth/overview",
-    "ImageUrl": "/media/20646/eth_logo.png",
-    "Name": "ETH",
-    "Symbol": "ETH",
-    "CoinName": "Ethereum",
-    "FullName": "Ethereum (ETH)",
-    "Algorithm": "Ethash",
-    "ProofType": "PoW",
-    "FullyPremined": "0",
-    "TotalCoinSupply": "0",
-    "PreMinedValue": "N/A",
-    "TotalCoinsFreeFloat": "N/A",
-    "SortOrder": "2",
-    "Sponsored": false
-  },
-  {
-    "Id": "3808",
-    "Url": "/coins/ltc/overview",
-    "ImageUrl": "/media/19782/litecoin-logo.png",
-    "Name": "LTC",
-    "Symbol": "LTC",
-    "CoinName": "Litecoin",
-    "FullName": "Litecoin (LTC)",
-    "Algorithm": "Scrypt",
-    "ProofType": "PoW",
-    "FullyPremined": "0",
-    "TotalCoinSupply": "84000000",
-    "PreMinedValue": "N/A",
-    "TotalCoinsFreeFloat": "N/A",
-    "SortOrder": "3",
-    "Sponsored": false
-  }
-] |};
 
 type coin = {
   id: string,
@@ -94,6 +24,18 @@ type coin = {
 };
 
 type coins = array(coin);
+
+type history = {
+  time: int,
+  close: float,
+  high: float,
+  low: float,
+  open_: float, /* open 為保留字 */
+  volumefrom: float,
+  volumeto: float
+}; 
+
+type histories = array(history);
 
 module Decode = {
   let parseCoinListAPI = (json) : Js.Json.t => {
@@ -116,6 +58,20 @@ module Decode = {
 
   let coins = (json) : array(coin) =>
     Json.Decode.(json |> array(coin));
+
+  let history = (json) : history =>
+    Json.Decode.{
+      time: json |> field("time", int),
+      close: json |> field("close", float),
+      high: json |> field("high", float),
+      low: json |> field("low", float),
+      open_: json |> field("open", float), 
+      volumefrom: json |> field("volumefrom", float), 
+      volumeto: json |> field("volumeto", float)
+    };
+
+  let histories = (json) : array(history) =>
+    Json.Decode.(json |> array(history));
 };
 
 let fetchCoinList = (callback) => 
@@ -123,11 +79,28 @@ let fetchCoinList = (callback) =>
     Fetch.fetch(coinListUrl)
     |> then_(Fetch.Response.json)
     |> then_(json => {
-      coinListFakeData  |> Js.Json.parseExn
+      FakeData.coinList |> Js.Json.parseExn
                         |> Decode.coins
                         |> coins => {
                           Js.log(coins);
                           callback(coins);
+                          resolve(());
+                        }
+      }
+    )
+    |> ignore
+  );
+
+let fetchHistoryByHour = (callback) =>
+  Js.Promise.(
+    Fetch.fetch(historyUrl)
+    |> then_(Fetch.Response.json)
+    |> then_(json => {
+      FakeData.history  |> Js.Json.parseExn
+                        |> Decode.histories
+                        |> histories => {
+                          Js.log(histories);
+                          callback(histories);
                           resolve(());
                         }
       }
