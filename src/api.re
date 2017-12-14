@@ -1,11 +1,14 @@
 type action =
   | LoadedCoinList(CoinData.coins)
   | LoadedHistories(CoinData.histories)
+  | LoadedPrice(CoinData.price)
+  | LoadedTopPairs(CoinData.topPairs)
   | Loading;
 
 type state = {
   coins: CoinData.coins,
   histories: CoinData.histories,
+  price: option(CoinData.price),
   loading: bool
 };
 
@@ -15,6 +18,9 @@ let make = (_children) => {
   let load = ({ReasonReact.state, reduce}) => {
     CoinData.fetchCoinList(reduce(payload => LoadedCoinList(payload))) |> ignore;
     CoinData.fetchHistoryByHour(reduce(payload => LoadedHistories(payload))) |> ignore;
+    CoinData.fetchHistoryByDay(reduce(payload => LoadedHistories(payload))) |> ignore;
+    CoinData.fetchTopPairs(reduce(payload => LoadedTopPairs(payload))) |> ignore;
+    CoinData.fetchPrice("BTC", reduce(payload => LoadedPrice(payload))) |> ignore;
     reduce(() => Loading, ())
   };
   {
@@ -23,6 +29,7 @@ let make = (_children) => {
     initialState: () => {
       coins: [||],
       histories: [||],
+      price: None,
       loading: false
     },
 
@@ -42,6 +49,18 @@ let make = (_children) => {
         ReasonReact.Update({
           ...state,
           histories: data,
+          loading: false
+        })
+
+      | LoadedPrice(data) =>
+        ReasonReact.Update({
+          ...state,
+          loading: false
+        })
+
+      | LoadedTopPairs(data) =>
+        ReasonReact.Update({
+          ...state,
           loading: false
         })
       },
