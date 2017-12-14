@@ -1,4 +1,4 @@
 type route =
   | Home
-  | Detail(int)
+  | Detail(string)
   | Api ;
