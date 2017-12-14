@@ -10,7 +10,8 @@ let renderForRoute = (route) =>
 let router =
   DirectorRe.makeRouter({
     "/": () => renderForRoute(Routing.Home),
-    "/detail/:id": (id: string) => renderForRoute(Routing.Detail(int_of_string(id)))
+    "/detail/:id": (id: string) => renderForRoute(Routing.Detail(int_of_string(id))),
+    "/api": () => renderForRoute(Routing.Api)
   });
 
 DirectorRe.init(router, "/");
