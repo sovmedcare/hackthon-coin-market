@@ -617,4 +617,5 @@ module.exports = function create(data) {
     });
   
   chart.render();
+
 }
