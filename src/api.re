@@ -1,9 +1,9 @@
 type action =
-  | Loaded(array(CoinData.coin))
+  | Loaded(CoinData.coins)
   | Loading;
 
 type state = {
-  coins: array(CoinData.coin),
+  coins: CoinData.coins,
   loading: bool
 };
 
@@ -34,14 +34,29 @@ let make = (_children) => {
         })
       },
     
-    didMount: (_self) => {
-      load(_self);
+    didMount: (self) => {
+      load(self);
       ReasonReact.NoUpdate;
     },
 
-    render: (_self) => {
+    render: (self) => {
       <div>
-        <h1> (ReasonReact.stringToElement("api")) </h1>
+        (
+          if (Array.length(self.state.coins) > 0) {
+            self.state.coins
+            |> Array.mapi((index: int, coin: CoinData.coin) => {
+              Js.log(coin);
+              <div>
+                <div>{ReasonReact.stringToElement(coin.id)}</div>
+                <div>{ReasonReact.stringToElement(coin.coinName)}</div>
+                <div>{ReasonReact.stringToElement(coin.name)}</div>
+              </div>
+            })
+            |> ReasonReact.arrayToElement
+          } else {
+            ReasonReact.nullElement
+          }
+        )
       </div>
     }
   }
