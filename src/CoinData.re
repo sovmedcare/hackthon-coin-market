@@ -1,7 +1,7 @@
 let baseUrl = "https://min-api.cryptocompare.com";
 
 let coinListUrl = {j|$baseUrl/data/all/coinlist|j};
-let priceUrl = (coinName) => {j|$baseUrl/data/price?fsym=BTC&tsyms=USD,EUR|j};
+let priceUrl = (coinName) => {j|$baseUrl/data/price?fsym=$coinName&tsyms=USD,EUR,TWD|j};
 let historyHourUrl = {j|$baseUrl/data/histohour?fsym=BTC&tsym=USD&limit=60&aggregate=3&e=CCCAGG|j};
 let historyDayUrl = {j|$baseUrl/data/histoday?fsym=BTC&tsym=USD&limit=60&aggregate=3&e=CCCAGG|j};
 let topPairUrl = {j|$baseUrl/data/top/pairs?fsym=ETH|j};
@@ -136,19 +136,22 @@ let fetchCoinList = (callback) =>
   );
 
 let fetchPrice = (coinName, callback) =>
-  Js.Promise.(
-    Fetch.fetch(priceUrl(coinName))
-    |> then_(Fetch.Response.json)
-    |> then_(json => {
-      json  |> Decode.price
-            |> price => {
-              callback(price);
-              resolve(());
-            }
-      }
+  {
+    Js.Promise.(
+      Fetch.fetch(priceUrl(coinName))
+      |> then_(Fetch.Response.json)
+      |> then_(json => {
+        json  |> Decode.price
+              |> price => {
+                callback(price);
+                resolve(());
+              }
+        }
+      )
+      |> ignore
     )
-    |> ignore
-  );
+
+  };
 
 let fetchHistoryByHour = (callback) =>
   Js.Promise.(
