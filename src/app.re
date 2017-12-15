@@ -11,6 +11,9 @@ let make = (~route, _children) => {
       | Routing.Detail(id) => <DetailPage id />
       | Routing.Api => <Api />
       };
-    <div> page </div>
+    <div className="app">
+      <Header />
+      <div className="container"> page </div>
+    </div>
   }
 };
