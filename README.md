@@ -8,6 +8,7 @@ A full cryto coin market demo by Facebook [reasonml](https://github.com/facebook
 - [x] css / style example
 - [x] side effect / state management
 - [x] third party js interop (for chart)
+- [x] connect with localStorage (remember your favor)
 
 ### Web snapshot
 ![](https://i.imgur.com/9Oa54y4.png)
