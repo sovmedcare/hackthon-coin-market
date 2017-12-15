@@ -1,3 +1,5 @@
+open Utils;
+
 type action =
   | LoadedCoinPrice(CoinData.price)
   | Loading;
@@ -11,7 +13,7 @@ let cellStyle = ReactDOMRe.Style.make(~flex="1", ~textAlign="right", ());
 
 let component = ReasonReact.reducerComponent("ListItem");
 
-let make = (~coinInfo: CoinData.coin, _children) => {
+let make = (~coinInfo: CoinData.coin, ~added: bool, _children) => {
   let loadPriceData = (coinName, {ReasonReact.state, reduce}) => {
     CoinData.fetchPrice(coinName, reduce(payload => LoadedCoinPrice(payload))) |> ignore;
     reduce(() => Loading, ())
@@ -33,10 +35,11 @@ let make = (~coinInfo: CoinData.coin, _children) => {
     },
     render: (self) => {
       <div style=(ReactDOMRe.Style.make(~display="flex", ()))>
-        <a style=(cellStyle) href={"/#/detail/" ++ coinInfo.name}>{ReasonReact.stringToElement(coinInfo.coinName)}</a>
-        <div style=(cellStyle)>{ReasonReact.stringToElement(string_of_float(self.state.price.usd))}</div>
-        <div style=(cellStyle)>{ReasonReact.stringToElement(string_of_float(self.state.price.eur))}</div>
-        <div style=(cellStyle)>{ReasonReact.stringToElement(string_of_float(self.state.price.twd))}</div>
+        <AddBtn style=(cellStyle) coinInfo added={added} />
+        <a style=(cellStyle) href={"/#/detail/" ++ coinInfo.name}>{textEl(coinInfo.coinName)}</a>
+        <div style=(cellStyle)>{floatEl(self.state.price.usd)}</div>
+        <div style=(cellStyle)>{floatEl(self.state.price.eur)}</div>
+        <div style=(cellStyle)>{floatEl(self.state.price.twd)}</div>
       </div>
     }
   }
