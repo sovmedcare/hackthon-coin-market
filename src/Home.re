@@ -52,7 +52,6 @@ let make = (_children) => {
             ()
           )
         )>
-          <div style=(cellStyle)>{ReasonReact.stringToElement("id")}</div>
           <div style=(cellStyle)>{ReasonReact.stringToElement("coinName")}</div>
           <div style=(cellStyle)>{ReasonReact.stringToElement("usd")}</div>
           <div style=(cellStyle)>{ReasonReact.stringToElement("eur")}</div>

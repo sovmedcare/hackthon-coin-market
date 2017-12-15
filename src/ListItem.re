@@ -33,7 +33,6 @@ let make = (~coinInfo: CoinData.coin, _children) => {
     },
     render: (self) => {
       <div style=(ReactDOMRe.Style.make(~display="flex", ()))>
-        <div style=(cellStyle)>{ReasonReact.stringToElement(coinInfo.id)}</div>
         <a style=(cellStyle) href={"/#/detail/" ++ coinInfo.name}>{ReasonReact.stringToElement(coinInfo.coinName)}</a>
         <div style=(cellStyle)>{ReasonReact.stringToElement(string_of_float(self.state.price.usd))}</div>
         <div style=(cellStyle)>{ReasonReact.stringToElement(string_of_float(self.state.price.eur))}</div>
