@@ -3,12 +3,15 @@ open Utils;
 type action =
   | LoadedCoinList(CoinData.coins)
   | LoadedObserveList(array(string))
+  | ObserveListChange
+  | ChangeFilter(string)
   | Loading;
 
 type state = {
   coins: CoinData.coins,
   observeList: array(string),
-  loading: bool
+  loading: bool,
+  filter: string,
 };
 
 let containerStyle = ReactDOMRe.Style.make(
@@ -18,6 +21,14 @@ let containerStyle = ReactDOMRe.Style.make(
   ~width="500px",
   ()
 );
+
+let listHeaderStyle = ReactDOMRe.Style.make(
+  ~display="flex",
+  ~justifyContent="space-around",
+  ~borderBottom="solid black 1px",
+  ()
+);
+
 let cellStyle = ReactDOMRe.Style.make(
   ~flex="1",
   ~textAlign="right",
@@ -48,13 +59,18 @@ let make = (_children) => {
     initialState: () => {
       coins: [||],
       observeList: [||],
-      loading: false
+      loading: false,
+      filter: "All"
     },
     reducer: (action, state) =>
       switch action {
       | Loading => ReasonReact.Update({...state, loading: true})
       | LoadedCoinList(data) => ReasonReact.Update({...state, coins: data, loading: false})
       | LoadedObserveList(list) => ReasonReact.Update({...state, observeList: list})
+      | ObserveListChange => ReasonReact.SideEffects((self) => {
+        loadObseveList(self)
+      })
+      | ChangeFilter(filter) => ReasonReact.Update({...state, filter})
       },
     didMount: (self) => {
       loadCoinsList(self);
@@ -62,33 +78,45 @@ let make = (_children) => {
       ReasonReact.NoUpdate;
     },
     render: (self) => {
+      let { loading, coins, observeList, filter } = self.state;
+      let visibleList = Array.fold_right(
+        (coinInfo: CoinData.coin, acc) => {
+          filter === "All"
+            ? Array.append([|coinInfo|], acc)
+            : unsafe_elem(coinInfo.name, observeList)
+              ? Array.append([|coinInfo|], acc)
+              : acc
+        }, coins, [||]);
       <div style=(containerStyle)>
-        <div style=(
-          ReactDOMRe.Style.make(
-            ~display="flex",
-            ~justifyContent="space-around",
-            ~borderBottom="solid black 1px",
-            ()
-          )
-        )>
-          <div style=(cellStyle)></div>
+        <div style=(listHeaderStyle)>
+          <div style=(cellStyle)>
+            {
+              filter == "All"
+              ? <button onClick={self.reduce((_) => ChangeFilter("MyFavor"))}>{textEl("Show MyFavor")}</button>
+              : <button onClick={self.reduce((_) => ChangeFilter("All"))}>{textEl("Show All")}</button>
+            }
+          </div>
           <div style=(cellStyle)>{textEl("coinName")}</div>
           <div style=(cellStyle)>{textEl("usd")}</div>
           <div style=(cellStyle)>{textEl("eur")}</div>
           <div style=(cellStyle)>{textEl("twd")}</div>
         </div>
         {
-          self.state.coins
+          loading
+            ? <div>{textEl("Loading...")}</div>
+            : ReasonReact.nullElement
+        }
+        {
+          visibleList
           |> Array.map((coinInfo: CoinData.coin) =>
               <ListItem
                 key=(coinInfo.id)
                 coinInfo
-                added=(
-                  unsafe_elem(coinInfo.name, self.state.observeList)
-                )
+                added=(unsafe_elem(coinInfo.name, observeList))
+                onObseveListChange=(self.reduce((_) => ObserveListChange))
               />
             )
-          |> ReasonReact.arrayToElement
+          |> arrayEl
         }
       </div>
     }

@@ -16,16 +16,18 @@ let removeItem = (coinName) => {
 
 let component = ReasonReact.reducerComponent("AddBtn");
 
-let make = (~coinInfo: CoinData.coin, ~added: bool, ~style, _children) => {
+let make = (~coinInfo: CoinData.coin, ~added: bool, ~onObseveListChange: unit => unit, ~style, _children) => {
   ...component,
   initialState: () => {added: added},
   reducer: (action, state) => {
     switch action {
       | RemoveFromObserveList(coinName) => ReasonReact.UpdateWithSideEffects({added: !state.added}, (_self) => {
         removeItem(coinName);
+        onObseveListChange();
       })
       | AddToObserveList(coinName) => ReasonReact.UpdateWithSideEffects({added: !state.added}, (_self) => {
         setItem(coinName);
+        onObseveListChange();        
       })
     }
   },
