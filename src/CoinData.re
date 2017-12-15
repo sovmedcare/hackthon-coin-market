@@ -4,7 +4,7 @@ let coinListUrl = {j|$baseUrl/data/all/coinlist|j};
 let priceUrl = (coinName) => {j|$baseUrl/data/price?fsym=BTC&tsyms=USD,EUR|j};
 let historyHourUrl = {j|$baseUrl/data/histohour?fsym=BTC&tsym=USD&limit=60&aggregate=3&e=CCCAGG|j};
 let historyDayUrl = {j|$baseUrl/data/histoday?fsym=BTC&tsym=USD&limit=60&aggregate=3&e=CCCAGG|j};
-let topPairUrl = {j|$baseUrl/data/top/pairs?fsym=ETH|j};
+let topPairUrl = (currency) => {j|$baseUrl/data/top/pairs?fsym=$currency|j};
 
 let transformCoinList: (Js.Json.t) => (Js.Json.t) = [%bs.raw
   {|
@@ -192,9 +192,9 @@ let fetchHistoryByDay = (callback) =>
     |> ignore
   );
 
-let fetchTopPairs = (callback) =>
+let fetchTopPairs = (currency, callback) =>
   Js.Promise.(
-    Fetch.fetch(topPairUrl)
+    Fetch.fetch(topPairUrl(currency))
     |> then_(Fetch.Response.json)
     |> then_(json => {
       json  |> transformData
