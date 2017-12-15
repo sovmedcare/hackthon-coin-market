@@ -16,6 +16,8 @@ A full cryto coin market demo by Facebook [reasonml](https://github.com/facebook
 
 ## Setup
 ```js
+npm install -g bs-platform
+
 git clone https://github.com/sovmedcare/hackthon-coin-market
 yarn install
 yarn start
