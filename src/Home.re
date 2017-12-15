@@ -18,7 +18,7 @@ let containerStyle = ReactDOMRe.Style.make(
   ~margin="0 auto",
   ~display="flex",
   ~flexDirection="column",
-  ~width="500px",
+  ~width="760px",
   ()
 );
 
@@ -32,6 +32,9 @@ let listHeaderStyle = ReactDOMRe.Style.make(
 let cellStyle = ReactDOMRe.Style.make(
   ~flex="1",
   ~textAlign="right",
+  ~padding="10px 8px",
+  ~fontSize="18px",
+  ~fontWeight="bolder",
   ()
 );
 
@@ -96,10 +99,11 @@ let make = (_children) => {
               : <button onClick={self.reduce((_) => ChangeFilter("All"))}>{textEl("Show All")}</button>
             }
           </div>
-          <div style=(cellStyle)>{textEl("coinName")}</div>
-          <div style=(cellStyle)>{textEl("usd")}</div>
-          <div style=(cellStyle)>{textEl("eur")}</div>
-          <div style=(cellStyle)>{textEl("twd")}</div>
+          <div style=(cellStyle)>{textEl("Coin Name")}</div>
+          <div style=(cellStyle)>{textEl("Name")}</div>
+          <div style=(cellStyle)>{textEl("USD")}</div>
+          <div style=(cellStyle)>{textEl("EUR")}</div>
+          <div style=(cellStyle)>{textEl("TWD")}</div>
         </div>
         {
           loading

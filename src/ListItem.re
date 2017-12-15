@@ -9,7 +9,12 @@ type state = {
   loading: bool
 };
 
-let cellStyle = ReactDOMRe.Style.make(~flex="1", ~textAlign="right", ());
+let cellStyle = ReactDOMRe.Style.make(
+  ~flex="1", 
+  ~textAlign="right", 
+  ~padding="10px 8px",
+  ()
+);
 
 let component = ReasonReact.reducerComponent("ListItem");
 
@@ -37,6 +42,7 @@ let make = (~coinInfo: CoinData.coin, ~added: bool, ~onObseveListChange: unit =>
       <div style=(ReactDOMRe.Style.make(~display="flex", ()))>
         <AddBtn style=(cellStyle) coinInfo added={added} onObseveListChange/>
         <a style=(cellStyle) href={"/#/detail/" ++ coinInfo.name}>{textEl(coinInfo.coinName)}</a>
+        <a style=(cellStyle) href={"/#/detail/" ++ coinInfo.name}>{textEl(coinInfo.name)}</a>
         <div style=(cellStyle)>{floatEl(self.state.price.usd)}</div>
         <div style=(cellStyle)>{floatEl(self.state.price.eur)}</div>
         <div style=(cellStyle)>{floatEl(self.state.price.twd)}</div>

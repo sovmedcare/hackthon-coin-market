@@ -4,12 +4,12 @@ let coinListUrl = {j|$baseUrl/data/all/coinlist|j};
 let priceUrl = (coinName) => {j|$baseUrl/data/price?fsym=$coinName&tsyms=USD,EUR,TWD|j};
 let historyHourUrl = (coinName) => {j|$baseUrl/data/histohour?tsym=USD&limit=60&aggregate=3&e=CCCAGG&fsym=$coinName|j};
 let historyDayUrl = {j|$baseUrl/data/histoday?fsym=BTC&tsym=USD&limit=60&aggregate=3&e=CCCAGG|j};
-let topPairUrl = (currency) => {j|$baseUrl/data/top/pairs?fsym=$currency|j};
+let topPairUrl = (currency) => {j|$baseUrl/data/top/pairs?fsym=$currency&limit=10|j};
 
 let transformCoinList: (Js.Json.t) => (Js.Json.t) = [%bs.raw
   {|
     function (json) {
-      var defaultCoins = ['BTC', 'ETH', 'LTC'];      
+      var defaultCoins = ['BTC', 'DASH', 'ETH', 'ZEC', 'XMR', 'LTC', 'IOT', 'NXT', 'DGB'];      
       return defaultCoins.map(function(coin) {
         return json['Data'][coin]
       })

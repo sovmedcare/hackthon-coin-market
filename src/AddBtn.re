@@ -35,7 +35,7 @@ let make = (~coinInfo: CoinData.coin, ~added: bool, ~onObseveListChange: unit =>
     let reducer = self.state.added ? (_) => RemoveFromObserveList(coinInfo.name) : (_) => AddToObserveList(coinInfo.name);
     {
       <div style=(style) onClick={self.reduce(reducer)}>
-        <button>{self.state.added ? textEl("remove") : textEl("add")}</button>
+        <button>{self.state.added ? textEl("Remove") : textEl("Add")}</button>
       </div>
     }
   }

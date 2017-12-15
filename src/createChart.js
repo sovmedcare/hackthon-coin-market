@@ -12,7 +12,7 @@ const create = (temp) => {
   }
   const chart = new g2.Chart({
     container: 'chart',
-    width: '900',
+    width: '760',
     height: '700'
   })
   const ds = new DataSet()
@@ -24,7 +24,7 @@ const create = (temp) => {
       callback: obj => {
         obj.trend = (obj.open <= obj.close) ? '上涨' : '下跌';
         obj.range = [ obj.open, obj.close, obj.high, obj.low ];
-        obj.time = moment().milliseconds(obj.time).toISOString()
+        obj.time = moment.unix(obj.time).toDate()
         return obj;
       }
     });

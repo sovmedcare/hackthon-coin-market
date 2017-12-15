@@ -54,10 +54,11 @@ let make = (_children) => {
       <div>
         <div className="select-list">
           {
-            [|"BTC", "LTC", "ETH"|]
+            [|"BTC", "DASH", "ETH", "ZEC", "XMR", "LTC", "IOT", "NXT", "DGB"|]
             |> Array.map(
               (currency: string) => {
-                <div className="select-item" onClick=(self.reduce((e)=>Toggle(currency)))>{textEl(currency)}</div>
+                let className = self.state.currency === currency ? "select-item active" : "select-item";
+                <div className=(className) onClick=(self.reduce((e)=>Toggle(currency)))>{textEl(currency)}</div>
               }
             )
             |> arrayEl

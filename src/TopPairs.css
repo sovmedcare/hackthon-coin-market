@@ -5,6 +5,12 @@
 .select-item {
   display: inline-block;
   margin-right: 24px;
+  cursor: pointer;
+}
+
+.select-item.active {
+  font-size: 24px;
+  font-weight: bolder;
 }
 
 .table {
@@ -18,6 +24,8 @@
 }
 
 .table .th {
+  font-size: 18px;
+  font-weight: bolder;
   border-bottom: solid black 1px;
 }
 
