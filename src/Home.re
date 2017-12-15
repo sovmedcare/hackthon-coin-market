@@ -8,6 +8,7 @@ type state = {
 };
 
 let containerStyle = ReactDOMRe.Style.make(
+  ~margin="0 auto",
   ~display="flex",
   ~flexDirection="column",
   ~width="500px",
