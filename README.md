@@ -1,13 +1,13 @@
 # SOV Hackthon #2 : crypto coin market realtime demo (加密貨幣市場價格即時查詢)
 
-A cryto coin market demo by reasonml / reasonml-react.
+A full cryto coin market demo by Facebook (reasonml)[https://github.com/facebook/reason] & (reasonml-react)[https://github.com/reasonml/reason-react].
 
 ### Feature
--[] api example (fetch, promise)
--[] json decode example
--[] css / style example
--[] side effect / state management
--[] third party js interop (for chart)
+- [x] api example (fetch, promise)
+- [x] json decode example
+- [x] css / style example
+- [x] side effect / state management
+- [x] third party js interop (for chart)
 
 ### Web snapshot
 ![](https://i.imgur.com/9Oa54y4.png)
