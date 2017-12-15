@@ -10,7 +10,11 @@ let make = (~route, _children) => {
       | Routing.Home => <Home />
       | Routing.Detail(id) => <DetailPage id />
       | Routing.Api => <Api />
+      | Routing.TopPairs => <TopPairs />
       };
-    <div> page </div>
+    <div className="app">
+      <Header />
+      <div className="container"> page </div>
+    </div>
   }
 };

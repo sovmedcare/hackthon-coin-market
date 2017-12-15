@@ -1,77 +1,122 @@
+open Utils;
+
 type action =
   | LoadedCoinList(CoinData.coins)
+  | LoadedObserveList(array(string))
+  | ObserveListChange
+  | ChangeFilter(string)
   | Loading;
 
 type state = {
   coins: CoinData.coins,
-  loading: bool
+  observeList: array(string),
+  loading: bool,
+  filter: string,
 };
+
+let containerStyle = ReactDOMRe.Style.make(
+  ~margin="0 auto",
+  ~display="flex",
+  ~flexDirection="column",
+  ~width="500px",
+  ()
+);
+
+let listHeaderStyle = ReactDOMRe.Style.make(
+  ~display="flex",
+  ~justifyContent="space-around",
+  ~borderBottom="solid black 1px",
+  ()
+);
+
+let cellStyle = ReactDOMRe.Style.make(
+  ~flex="1",
+  ~textAlign="right",
+  ()
+);
+
+let unsafeGetKeysInLocalStorage: unit => array(string) = [%bs.raw
+{|
+function () {
+  return Object.keys(localStorage)
+}
+|}
+];
 
 let component = ReasonReact.reducerComponent("Home");
 
 let make = (_children) => {
-  let load = ({ReasonReact.state, reduce}) => {
+  let loadCoinsList = ({ReasonReact.state, reduce}) => {
     CoinData.fetchCoinList(reduce(payload => LoadedCoinList(payload))) |> ignore;
     reduce(() => Loading, ())
+  };
+  let loadObseveList = ({ReasonReact.state, reduce}) => {
+    let items = unsafeGetKeysInLocalStorage();
+    reduce(() => LoadedObserveList(items), ())
   };
   {
     ...component,
     initialState: () => {
       coins: [||],
-      loading: false
+      observeList: [||],
+      loading: false,
+      filter: "All"
     },
     reducer: (action, state) =>
-    switch action {
-    | Loading => 
-      ReasonReact.Update({...state, loading: true})
-  
-    | LoadedCoinList(data) =>
-      ReasonReact.Update({
-        coins: data,
-        loading: false
+      switch action {
+      | Loading => ReasonReact.Update({...state, loading: true})
+      | LoadedCoinList(data) => ReasonReact.Update({...state, coins: data, loading: false})
+      | LoadedObserveList(list) => ReasonReact.Update({...state, observeList: list})
+      | ObserveListChange => ReasonReact.SideEffects((self) => {
+        loadObseveList(self)
       })
-    },
+      | ChangeFilter(filter) => ReasonReact.Update({...state, filter})
+      },
     didMount: (self) => {
-      load(self);
+      loadCoinsList(self);
+      loadObseveList(self);
       ReasonReact.NoUpdate;
     },
     render: (self) => {
-      <div style=(
-        ReactDOMRe.Style.make(
-          ~display="flex",
-          ~flexDirection="column",
-          ~width="300px",
-          ()
-        )
-      )>
-      <div style=(
-        ReactDOMRe.Style.make(
-          ~display="flex",
-          ~justifyContent="space-around",
-          ~borderBottom="solid black 1px",
-          ()
-        )
-      )>
-        <div>{ReasonReact.stringToElement("id")}</div>
-        <div>{ReasonReact.stringToElement("coinName")}</div>
-      </div>
+      let { loading, coins, observeList, filter } = self.state;
+      let visibleList = Array.fold_right(
+        (coinInfo: CoinData.coin, acc) => {
+          filter === "All"
+            ? Array.append([|coinInfo|], acc)
+            : unsafe_elem(coinInfo.name, observeList)
+              ? Array.append([|coinInfo|], acc)
+              : acc
+        }, coins, [||]);
+      <div style=(containerStyle)>
+        <div style=(listHeaderStyle)>
+          <div style=(cellStyle)>
+            {
+              filter == "All"
+              ? <button onClick={self.reduce((_) => ChangeFilter("MyFavor"))}>{textEl("Show MyFavor")}</button>
+              : <button onClick={self.reduce((_) => ChangeFilter("All"))}>{textEl("Show All")}</button>
+            }
+          </div>
+          <div style=(cellStyle)>{textEl("coinName")}</div>
+          <div style=(cellStyle)>{textEl("usd")}</div>
+          <div style=(cellStyle)>{textEl("eur")}</div>
+          <div style=(cellStyle)>{textEl("twd")}</div>
+        </div>
         {
-          self.state.coins
-          |> Array.map(
-              (coin: CoinData.coin) => {
-                <div style=(
-                  ReactDOMRe.Style.make(
-                    ~display="flex",
-                    ~justifyContent="space-around",
-                    ()
-                  )
-                )>
-                  <div>{ReasonReact.stringToElement(coin.id)}</div>
-                  <a href={"/#/detail/" ++ coin.name}>{ReasonReact.stringToElement(coin.coinName)}</a>
-                </div>
-              }
+          loading
+            ? <div>{textEl("Loading...")}</div>
+            : ReasonReact.nullElement
+        }
+        {
+          visibleList
+          |> Array.map((coinInfo: CoinData.coin) =>
+              <ListItem
+                key=(coinInfo.id)
+                coinInfo
+                added=(unsafe_elem(coinInfo.name, observeList))
+                onObseveListChange=(self.reduce((_) => ObserveListChange))
+              />
             )
-          |> ReasonReact.arrayToElement
+          |> arrayEl
         }
       </div>
     }
