@@ -1,50 +1,61 @@
 open Utils;
 
-type data = {
-  year: string,
-  value: float,
-};
-
-[@bs.module] external create: array(data) => unit = "./createChart";
+[@bs.module] external create: CoinData.histories => unit = "./createChart";
 
 type state = {
-  data: array(data)
+  coinName: string,
+  histories: CoinData.histories,
+  loading: bool,
 };
 
 type action =
-  | LoadedHistories(array(data));
+  | LoadedHistories(CoinData.histories)
+  | Loading(string);
 
 let component = ReasonReact.reducerComponent("DetailPage");
 
 let make = (~id, _children) => {
   let load = ({ReasonReact.state, reduce}) => {
-    CoinData.fetchHistoryByHour(reduce(symbol => LoadedHistories(symbol))) |> ignore;
-    reduce(() => Loading, ())
+    CoinData.fetchHistoryByHour(id, reduce(data => LoadedHistories(data))) |> ignore;
+    reduce(() => Loading(id), ());
   };
   {
     ...component,
     initialState: () => {
-      data: [|{ year: "1991", value: 3.0 },
-      { year: "1992", value: 4.0 },
-      { year: "1993", value: 3.5 },
-      { year: "1994", value: 5.0},
-      { year: "1995", value: 4.9 },
-      { year: "1996", value: 6.0 },
-      { year: "1997", value: 7.0 },
-      { year: "1998", value: 9.0 },
-      { year: "1999", value: 13.0 }|]
+      coinName: id,
+      histories: [||],
+      loading: false,
     },
     reducer: (action, state) =>
       switch action {
-      | LoadedHistories(newData) => ReasonReact.Update({data: newData}) 
+      | LoadedHistories(newData) => ReasonReact.Update({...state, histories: newData, loading: false}) 
+      | Loading(coinName) => ReasonReact.Update({...state, coinName, loading: true})
       },
     didMount: (_self) => {
-      create(_self.state.data);
+      Js.log("Didmount");
+      load(_self);
       ReasonReact.NoUpdate
+    },
+    didUpdate: ({oldSelf, newSelf}) => {
+      if (newSelf.state.coinName !== id) {
+        Js.log(newSelf.state.coinName);
+        Js.log(id);
+        load(newSelf);
+      }
     },
     render: (_self) => {
       <div>
         <h1> (textEl(id)) </h1>
+        (
+          if (!_self.state.loading && Array.length(_self.state.histories) > 0) {
+            _self.state.histories
+            |> create
+            |> (unit) => textEl("")
+          } else {
+            Js.log("else");
+            ReasonReact.nullElement
+          }
+        )
         <div id="chart"></div>
       </div>
     }
