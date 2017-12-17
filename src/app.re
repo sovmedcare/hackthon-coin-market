@@ -9,7 +9,6 @@ let make = (~route, _children) => {
       switch route {
       | Routing.Home => <Home />
       | Routing.Detail(id) => <DetailPage id />
-      | Routing.Api => <Api />
       | Routing.TopPairs => <TopPairs />
       };
     <div className="app">

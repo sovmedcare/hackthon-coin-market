@@ -11,7 +11,6 @@ let router =
   DirectorRe.makeRouter({
     "/": () => renderForRoute(Routing.Home),
     "/detail/:id": (id: string) => renderForRoute(Routing.Detail(id)),
-    "/api": () => renderForRoute(Routing.Api),
     "/topPairs": () => renderForRoute(Routing.TopPairs)
   });
 
